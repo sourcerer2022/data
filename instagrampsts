@@ -1,0 +1,59 @@
+from instagramy import InstagramUser
+import sqlite3
+
+conn = sqlite3.connect('allnews.db')
+cursor = conn.cursor()
+createTable = """CREATE TABLE IF NOT EXISTS
+postInfo(id INTEGER PRIMARY KEY autoincrement, accName TEXT, numLikes TEXT, numComments TEXT, numViews TEXT, postLink TEXT, date TEXT, mediaType TEXT)"""
+cursor.execute(createTable)
+
+#not a therapy session
+session_id = "49820272071%3A02otanjvFormEY%3A15"
+
+# listOfUsers = ['flowsportsapp', 'edge105fm', 'kool97fm', 
+#             'suncitytvja', 'thebreathofchange', 'fyah105', 
+#             'newstalk93fm', 'hypetvjamaica', 'klassportsfm89',
+#             'roots96fmja', 'gospeljafm', 'bessfmjamaica', 
+#             'mercyandtruthministries', 'music99fm']
+
+secondListOfUsers = ['tvjnews', 'jamaicagleaner', 'thejamaicastar',
+                    'radiojamaica94fm', 'fame95fm1', 'janewsnetwork',
+                    'retvjamaica', 'power106_876', 'hitz92fm', 
+                    'jamaicaobserver', 'officialzip103fm', 'sportsmaxtv',
+                    'pbcjamaica', 'nationwide90fm', 'cvm_television',
+                    'iriefm_ja']
+
+#confirm username of "JUICETV JAMAICA" and "BLAZIN 95"
+
+for username in secondListOfUsers:
+    user = InstagramUser(f'{username}', sessionid=session_id) 
+    items = user.posts
+    for item in items:
+        likes = item.likes
+        comments = item.comments
+        try:
+            views = item.video_view_count
+        except:
+            views = 0
+        mediaType = item.is_video
+        link = item.post_url
+        date = item.taken_at_timestamp #should probs trim this to just show me the date tbh, and remove time
+
+        cursor.execute("INSERT INTO {tableName} (accName, numLikes, numComments, numViews, postLink, date, mediaType) VALUES(?, ?, ?, ?, ?, ?, ?)".format(tableName="postInfo"),
+        (username, likes, comments, views, link, date, mediaType))
+
+        # num_of_items +=1
+        # if num_of_items == 12: 
+        #     #after twelve posts is when it stops, 
+        #     #probs need to wait for page to load bc of infinite scrolling. 
+        #     # but since not using selenium, how do i get it to implictly wait. woi
+        #     print("something happens here")
+        conn.commit()
+    conn.commit()
+conn.commit()
+    
+
+
+DISPLAYALL = cursor.execute("SELECT * FROM postInfo")
+fullList = cursor.fetchall()
+print(fullList)
